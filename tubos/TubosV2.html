@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<style>*{ -webkit-tap-highlight-color: rgba(0,0,0,0);}</style>
+</head>
+<body>
+	<canvas id="canvas" width="400" height="280" style="cursor:pointer"></canvas>
+	<script>
+		alert("La idea es ordenas las pelotas de tal forma que queden en un tubo pelotas del mismo color, avanzas de nivel cuando todas las pelotas estén ordenadas ");
+		const espera = ms => new Promise(resuelve => setTimeout(resuelve, ms));
+		let canvas=document.querySelector("#canvas");
+		let ctx=canvas.getContext("2d");
+		let g=10,ftp=20,cr=90;
+		//////////////////////////////////////////////////////////////
+		let nivel=1,colores,cont,tubos,nt=0,np=0,t_=null,resueltos;
+		///////////////////////////////////////////////////////////////
+		class Pelota{
+			constructor(x,y,suelo,c){
+				this.x=x;
+				this.y=y;
+				this.c=c;
+				this.suelo=suelo;
+				this.t=23//this.suelo/g;
+				this.hM=y
+			}
+		}
+		class Tubo{
+			constructor(x,y){
+				this.x=x;
+				this.y=y;
+				this.pelotas=[];
+				this.suelo=this.y+120;
+				this.c="black";
+			}
+		}
+		
+		
+		function create() {
+			//console.log(nt,np)
+			let c,est=false;
+			do{
+
+				c=colores[Random(0,colores.length)];
+				cont[colores.indexOf(c)]++;
+				if(cont[colores.indexOf(c)]>3){
+					cont.splice(colores.indexOf(c),1)
+					colores.splice(colores.indexOf(c),1)
+					est=true;
+				}else{
+					est=false;
+				}
+			}while(est);
+			tubos[nt].pelotas.push(new Pelota(tubos[nt].x+25,0,tubos[nt].suelo-(np*40),c))
+			mover(tubos[nt].pelotas[np],nt)	
+		}
+				function load() {
+					
+					espera(400).then(() => {
+						
+						if(nt<tubos.length-1){//numero de tubos
+							if(np<3){//numero e pelotas por tubo
+								create()
+								np++;
+							}else{
+								nt++;
+								np=0;
+							}
+
+						load()
+						}
+					});
+
+					
+
+		}
+		function mover(e,i) {
+			let ciclo=setInterval(()=>{
+				try{
+					e.y-=(.5)*g*(e.t*e.t)/1000;
+				if(e.y+20>=e.suelo){
+					g*=-1;
+					if(e.hM<Math.abs(tubos[i].y-40))e.hM=Math.abs(tubos[i].y-40)
+					e.hM+=e.hM*(cr/100);
+					//e.t=e.suelo/g
+				}
+				if(e.hM>=e.suelo)clearInterval(ciclo)
+				if(e.y<e.hM){
+					g*=-1
+				} 
+				paint()
+			}catch(e){
+				clearInterval(ciclo)
+				console.error(e)
+			}
+			},ftp/1000)
+		}
+		function paint() {
+			canvas.width=canvas.width;
+			tubos.map((e)=>{
+				ctx.strokeStyle=e.c;
+				ctx.strokeRect(e.x,e.y,50,120);
+				e.pelotas.map((e)=>{
+					ctx.beginPath();
+					ctx.save();
+					ctx.fillStyle = e.c;
+					ctx.strokeStyle = e.c;
+					ctx.arc(e.x,e.y,20,20,0,toRad(360));
+					ctx.fill();
+				
+			})
+			})
+			
+		}
+		function ini() {
+			 colores=["red","blue","green","yellow","purple","orange","pink","black","gray","aqua","chartreuse","brown"];
+			 cont=[0,0,0,0,0,0,0,0,0,0,0,0];
+			if(nivel==1){
+				tubos=[new Tubo(10,10),new Tubo(70,10),new Tubo(130,10)];
+			}
+			else if(nivel==2){
+				tubos=[new Tubo(10,10),new Tubo(70,10),new Tubo(130,10),new Tubo(190,10)];
+			}
+			else if(nivel==3){
+				tubos=[new Tubo(10,10),new Tubo(70,10),new Tubo(130,10),new Tubo(190,10),new Tubo(250,10)];
+			}
+			else if(nivel==4){
+				tubos=[new Tubo(10,10),new Tubo(70,10),new Tubo(130,10),new Tubo(190,10),new Tubo(250,10),new Tubo(310,10)];
+			}
+			else if(nivel==5){
+				tubos=[new Tubo(10,10),new Tubo(70,10),new Tubo(130,10),new Tubo(190,10),new Tubo(250,10),new Tubo(310,10)
+				  ,new Tubo(10,140)];
+			}
+			else if(nivel==6){
+				tubos=[new Tubo(10,10),new Tubo(70,10),new Tubo(130,10),new Tubo(190,10),new Tubo(250,10),new Tubo(310,10)
+				  ,new Tubo(10,140),new Tubo(70,140)];
+			}
+			else if(nivel==7){
+				tubos=[new Tubo(10,10),new Tubo(70,10),new Tubo(130,10),new Tubo(190,10),new Tubo(250,10),new Tubo(310,10)
+				  ,new Tubo(10,140),new Tubo(70,140),new Tubo(130,140)];
+			}
+			else if(nivel==8){
+				tubos=[new Tubo(10,10),new Tubo(70,10),new Tubo(130,10),new Tubo(190,10),new Tubo(250,10),new Tubo(310,10)
+				  ,new Tubo(10,140),new Tubo(70,140),new Tubo(130,140),new Tubo(190,140)];
+			}
+			else if(nivel==9){
+				tubos=[new Tubo(10,10),new Tubo(70,10),new Tubo(130,10),new Tubo(190,10),new Tubo(250,10),new Tubo(310,10)
+				  ,new Tubo(10,140),new Tubo(70,140),new Tubo(130,140),new Tubo(190,140),new Tubo(250,140)];
+
+			}
+			else if(nivel==10){
+				tubos=[new Tubo(10,10),new Tubo(70,10),new Tubo(130,10),new Tubo(190,10),new Tubo(250,10),new Tubo(310,10)
+				  ,new Tubo(10,140),new Tubo(70,140),new Tubo(130,140),new Tubo(190,140),new Tubo(250,140),new Tubo(310,140)];
+			}else{
+				alert("Fin del Juego")
+			}
+		colores.splice(tubos.length-1,colores.length)
+		cont.splice(tubos.length-1,cont.length)
+		nt=0;
+		np=0;
+		t_=null;
+		resueltos= 0;
+		load();
+		}ini()
+		//---------------------------
+		
+		function game(x,y) {
+			resueltos= 0;
+			
+		    
+			for (var i = 0; i < tubos.length; i++) {
+				if(x< tubos[i].x + 50 &&
+			       x>= tubos[i].x &&
+			       y< tubos[i].y +120&&
+			       y>= tubos[i].y){
+					if(t_==null){
+						t_=i;
+						tubos[i].c="blue"
+						paint()
+					}else{
+						if(i!=t_){
+							if(tubos[t_].pelotas.length>0 ){
+								if(tubos[i].pelotas.length<3){
+									let p=tubos[t_].pelotas.length-1;
+									tubos[i].pelotas.push(tubos[t_].pelotas[p])
+									let p2=tubos[i].pelotas.length-1;
+									tubos[i].pelotas[p2].x=tubos[i].x+25
+									tubos[i].pelotas[p2].y=0
+									tubos[i].pelotas[p2].hM=0
+									tubos[i].pelotas[p2].suelo=tubos[i].suelo-(p2*40);
+									//tubos[i].pelotas[p2].t=tubos[i].pelotas[p2].suelo/g
+									tubos[t_].pelotas.splice(p,1)
+									mover(tubos[i].pelotas[p2],i)
+									paint()
+
+								}
+								}
+								tubos[t_].c="black"
+								t_=null;
+								paint()
+						}
+
+					}
+				}
+				for (var e = 0; e < tubos[i].pelotas.length; e++) {
+					try{
+						if(tubos[i].pelotas[e].c==tubos[i].pelotas[e+1].c){
+						resueltos++;
+					}
+				}catch(e){}
+				}
+				
+
+			}
+			espera(1800).then(() => {
+				if(resueltos/2==tubos.length-1){
+					nivel++;
+				alert("Nivel "+nivel);
+				
+				ini()
+			}
+		})
+			
+
+		}
+		function toRad(g){
+			return (g*Math.PI)/180;
+		}
+		function Random(min, max) { 
+			return Math.floor(Math.random() * (max - min)) + min;
+		}
+		canvas.addEventListener("click",(e)=>{
+			game(e.clientX,e.clientY)
+		})
+	</script>
+</body>
+</html>
