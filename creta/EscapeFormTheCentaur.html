@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<style type="text/css">
+		.log{
+			max-width: 400px;
+			margin: 29px 0;
+			color: #feb645;
+			text-align: center;
+			
+			background: rgba(197,41,17,1);
+			font-family: sans-serif;
+			box-sizing: border-box;
+			padding: 29px;
+background: -moz-radial-gradient(center, ellipse cover, rgba(197,41,17,1) 0%, rgba(197,41,17,1) 0%, rgba(187,34,7,1) 13%, rgba(163,28,10,1) 54%, rgba(83,25,19,1) 100%);
+background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%, rgba(197,41,17,1)), color-stop(0%, rgba(197,41,17,1)), color-stop(13%, rgba(187,34,7,1)), color-stop(54%, rgba(163,28,10,1)), color-stop(100%, rgba(83,25,19,1)));
+background: -webkit-radial-gradient(center, ellipse cover, rgba(197,41,17,1) 0%, rgba(197,41,17,1) 0%, rgba(187,34,7,1) 13%, rgba(163,28,10,1) 54%, rgba(83,25,19,1) 100%);
+background: -o-radial-gradient(center, ellipse cover, rgba(197,41,17,1) 0%, rgba(197,41,17,1) 0%, rgba(187,34,7,1) 13%, rgba(163,28,10,1) 54%, rgba(83,25,19,1) 100%);
+background: -ms-radial-gradient(center, ellipse cover, rgba(197,41,17,1) 0%, rgba(197,41,17,1) 0%, rgba(187,34,7,1) 13%, rgba(163,28,10,1) 54%, rgba(83,25,19,1) 100%);
+background: radial-gradient(ellipse at center, rgba(197,41,17,1) 0%, rgba(197,41,17,1) 0%, rgba(187,34,7,1) 13%, rgba(163,28,10,1) 54%, rgba(83,25,19,1) 100%);
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#c52911', endColorstr='#531913', GradientType=1 );
+}
+
+</style>
+</head>
+<body>
+	<canvas id="canvas" width="400" height="400" ></canvas>
+	<div class="log"></div>
+	<script>
+		let canvas=document.querySelector("#canvas");
+		let ctx=canvas.getContext("2d");
+		const espera = ms => new Promise(resuelve => setTimeout(resuelve, ms));
+		class Celda{
+			constructor(){
+				this.a=true;
+				this.d=true//(Random(0,100)>50);
+				this.visitado=false;
+
+			}
+			paint(x,y){
+				ctx.strokeStyle="black"
+				if(this.a==true){
+					
+					ctx.beginPath()
+					ctx.moveTo(x*w,y*h);
+					ctx.lineTo(x*w+w,y*h);
+					ctx.stroke();
+						
+				}
+				if(this.d==true){
+					
+					ctx.beginPath()
+					ctx.moveTo(x*w+w,y*h);
+					ctx.lineTo(x*w+w,y*h+h);
+					ctx.stroke();
+					
+				}
+
+			
+			}
+		}
+
+		let tablero=createMatriz(20,20,2);
+		let w=Math.floor(canvas.width/tablero.length);
+		let h=Math.floor(canvas.height/tablero.length);
+		let skin={
+			x:0,
+			y:0,
+			llave:false
+		}
+		let llavex=Math.floor(tablero.length/2)*w,llavey=Math.floor(tablero.length/2)*h;
+		let toro={
+			x:Math.floor(tablero.length/2)*w,
+			y:Math.floor(tablero.length/2)*h
+		}
+		var sprite = new Image();
+        sprite.src="minotauro.png";
+        var indiceX=0, indiceY=0;
+		function distancia(x,y,x2,y2){
+			return Math.floor(Math.sqrt(Math.pow(x-x2,2)+Math.pow(y-y2,2)));
+		}
+		let est=false,it=0;
+		let moverToro=setInterval(()=>{
+			
+			if(distancia(toro.x/w,toro.y/w,skin.x/w,skin.y/w)<=4 && ( it<Math.floor(camino.length/10)|| est==false)){
+				document.querySelector(".log").innerHTML=("Te ha olfateado!<br>")
+					camino=[]
+					for(let i=0;i<tablero.length;i++){
+						for(let e=0;e<tablero.length;e++){
+							tablero[e][i].visitado=false;
+						}
+					}	
+			 		recursiva(toro.x/w,toro.y/w,skin.x/w,skin.y/w);
+			 		
+			 		est=true;
+			 		it=camino.length-1;
+
+			}else if(est==false){
+				
+			try{
+			document.querySelector(".log").innerHTML=("Se esta alejando<br>")
+				camino=[]
+					for(let i=0;i<tablero.length;i++){
+						for(let e=0;e<tablero.length;e++){
+							tablero[e][i].visitado=false;
+						}
+					}	
+			 		recursiva(toro.x/w,toro.y/w,Random(Math.floor(tablero.length*3/4),tablero.length),Random(Math.floor(tablero.length*3/4),tablero.length));
+			 		
+			 		est=true;
+			 		it=camino.length-1;
+			
+			}catch(e){}
+		}
+		if(est){
+				if(camino[it].x*w-toro.x>0)indiceY=2;
+				if(camino[it].x*w-toro.x<0)indiceY=1;
+				if(camino[it].y*w-toro.y>0)indiceY=0;
+				if(camino[it].y*w-toro.y<0)indiceY=3;
+				toro.x=camino[it].x*w
+				toro.y=camino[it].y*h
+				
+				it--;
+				paint()
+				if(skin.x<toro.x+w &&
+					 skin.x+w>toro.x &&
+					  skin.y<toro.y+w &&
+					   skin.y+w>toro.y){
+					alert("Game over");
+					clearInterval(moverToro)
+					window.location.reload()
+				}
+				if(it==0)est=false;
+			}
+		paint()
+			
+
+			
+		},999);
+		function game() {
+			document.querySelector(".log").innerHTML=("Estas en el laberinto de CRETA encuentra la llave y evita al minotauro<br>")
+			for(let i=0;i<tablero.length;i++){
+				for(let e=0;e<tablero.length;e++){
+					tablero[e][i]=new Celda();
+				}
+			}		
+			mueve(0,0,0,0)
+			paint()
+		}game()
+		function mueve(x,y,px,py) {
+			if(x<0 || x>=tablero.length ||
+			   y<0 || y>=tablero.length ||
+			   y<0 || y>=tablero.length ||
+			   tablero[x][y].visitado==true){
+				return false;
+			}else{
+				tablero[x][y].visitado=true;
+
+				if(x>px)tablero[px][py].d=false
+				if(x<px)tablero[x][y].d=false
+				if(y<py)tablero[px][py].a=false
+				if(y>py)tablero[x][y].a=false
+					//////////////////////////////
+				let dir=[[0,-1],[1,0],[0,1],[-1,0]];
+				for (var i = 0; i < 10; i++) {
+					let n=Random(0,3);
+					let t=dir[n];
+					dir[n]=dir[n+1]
+					dir[n+1]=t;
+				}
+				if(mueve(x+dir[0][0],y+dir[0][1],x,y)==false&&
+					mueve(x+dir[1][0],y+dir[1][1],x,y)==false&&
+					mueve(x+dir[2][0],y+dir[2][1],x,y)==false&&
+					mueve(x+dir[3][0],y+dir[3][1],x,y)==false){
+					return false;
+				}
+				
+
+				return true;
+			}
+		}
+		function paint() {
+			canvas.width=canvas.width
+
+			for(let i=0;i<tablero.length;i++){
+				for(let e=0;e<tablero.length;e++){
+					ctx.drawImage(sprite, indiceX*80, indiceY*80,80,80,toro.x,toro.y,w, h);
+					tablero[e][i].paint(e,i)
+					
+
+				}
+			}
+			ctx.drawImage(sprite, indiceX*80, indiceY*80,80,80,toro.x,toro.y,w, h);
+			ctx.beginPath()
+			ctx.moveTo(0,0);
+			ctx.lineTo(0,canvas.height);
+			ctx.stroke();
+			ctx.beginPath()
+			ctx.moveTo(0,canvas.height);
+			ctx.lineTo(canvas.width,canvas.height);
+			ctx.stroke();
+			ctx.lineWidth=8;
+			ctx.strokeStyle="yellow"
+			ctx.beginPath()
+			ctx.moveTo(0,0);
+			ctx.lineTo(0,h);
+			ctx.stroke();
+			ctx.strokeStyle="green"
+			ctx.beginPath()
+			ctx.moveTo((tablero.length-1)*w+w,(tablero.length-1)*h);
+			ctx.lineTo((tablero.length-1)*w+w,(tablero.length-1)*h+h);
+			ctx.stroke();
+
+			ctx.drawImage(sprite, indiceX*80, indiceY*80,80,80,toro.x,toro.y,w, h);
+            indiceX+=1;
+            if(indiceX>4){
+                indiceX = 0;
+            }
+			
+			ctx.fillStyle="blue"
+			ctx.fillRect(skin.x+3,skin.y+3,w-6,h-6)
+			if(skin.llave==false){
+				ctx.fillStyle="gray"
+				ctx.fillRect(llavex+3,llavey+3,w-6,h-6)
+			}
+			antorcha(skin.x+(w/2),skin.y+(w/2))
+
+		}
+		//////////////////////////////////////////////////////////////
+       
+        let camino=[]
+        function recursiva(x,y,fx,fy){
+        	ctx.fillStyle="red"
+            if(tablero[x][y].visitado==false){
+                tablero[x][y].visitado = true;
+            }
+            else return false;
+
+            if(x==fx && y==fy){
+                camino.push({x:x,y:y})
+                return true;
+            }
+            else{
+                if(tablero[x][y].d==false){
+                   
+                    if(recursiva(x+1,y,fx,fy)){
+                        camino.push({x:x,y:y})
+                         
+                        return true;
+                    }
+                }
+                if(y!=tablero.length-1){
+                    if(tablero[x][y+1].a==false){
+                        
+                        if(recursiva(x,y+1,fx,fy)){
+                            camino.push({x:x,y:y})
+                            
+                            return true;
+                        }
+                    }
+                }
+                if(x!=0){
+                    if(tablero[x-1][y].d==false){
+                        
+                        if(recursiva(x-1,y,fx,fy)){
+                            camino.push({x:x,y:y})
+                            
+                            return true;
+                        }
+                    }
+                }
+                if(tablero[x][y].a==false){
+                    if(recursiva(x,y-1,fx,fy)){
+                        camino.push({x:x,y:y})
+                        
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+		///////////////////////////////////////////////////////////
+		function Random(min, max) {
+ 			return Math.floor(Math.random() * (max - min)) + min;
+		}
+		function createMatriz(f,c,r=0) {
+			let m=[f]
+			for (var i = 0; i <f; i++) {
+				m[i]=[]
+				for (var e = 0; e < c; e++) {
+					m[i][e]=r
+				}
+			}
+			return m;
+		}
+		function antorcha(x,y) {
+			ctx.beginPath();
+			ctx.save();
+			ctx.strokeStyle = "#f7f76ca3";
+			ctx.lineWidth =w;
+			ctx.arc(x,y,w,0,toRad(360));
+			ctx.stroke();
+			ctx.beginPath();
+			ctx.save();
+			ctx.strokeStyle = "#f4f433ad";
+			ctx.lineWidth =w;
+			ctx.arc(x,y,w*2,0,toRad(360));
+			ctx.stroke();
+			ctx.beginPath();
+			ctx.save();
+			ctx.strokeStyle = "#232307";
+			ctx.lineWidth =w;
+			ctx.arc(x,y,w*3,0,toRad(360));
+			ctx.stroke();
+			for (var i = 0; i <25; i++) {
+				ctx.beginPath();
+				ctx.save();
+				ctx.strokeStyle = "black";
+				ctx.lineWidth =w;
+				ctx.arc(x,y,w*(4+i),0,toRad(360));
+				ctx.stroke();
+			}
+			
+			
+			
+			
+		}
+		function toRad(g){
+
+			return (g*Math.PI)/180;
+		}
+		document.addEventListener("keypress",(e)=>{
+			try{
+
+
+			if(e.keyCode==97 && tablero[Math.floor(skin.x/w)-1][Math.floor(skin.y/h)].d==false){ // izquierda
+				skin.x+=-w
+			}
+			if(e.keyCode==100 && tablero[Math.floor(skin.x/w)][Math.floor(skin.y/h)].d==false){	// derecha
+				skin.x+=w
+			}
+			if(e.keyCode==119 && tablero[Math.floor(skin.x/w)][Math.floor(skin.y/h)].a==false){	// arriba
+				skin.y+=-w
+			}
+			if(e.keyCode==115 && tablero[Math.floor(skin.x/w)][Math.floor(skin.y/h)+1].a==false){ // abajo
+				skin.y+=w
+			}
+			}catch(e){}
+			paint()
+			if(skin.x/w ==(tablero.length-1)&& skin.y/w==(tablero.length-1)){
+				if(skin.llave==true){
+					alert("YOU WIN")
+				clearInterval(moverToro);
+			}else{
+				document.querySelector(".log").innerHTML=("Encuentra la llave y cuidado con el Minotaruro<br>")
+			}
+				
+			}
+			if(skin.x<llavex+w &&
+				skin.x+w>llavex &&
+				skin.y<llavey+w &&
+				skin.y+w>llavey){skin.llave=true;
+				camino=[]
+					for(let i=0;i<tablero.length;i++){
+						for(let e=0;e<tablero.length;e++){
+							tablero[e][i].visitado=false;
+						}
+					}	
+			 		recursiva(toro.x/w,toro.y/w,tablero.length-1,tablero.length-1);
+			 		
+			 		est=true;
+			 		it=camino.length-1;
+			 		document.querySelector(".log").innerHTML=("Corre el Minotaruro Esta serca<br>")
+			}
+			
+		})
+
+	</script>
+</body>
+</html>																										
