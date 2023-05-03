@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        button{
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 100%;
+            border: none;
+            background-color: rgb(44, 163, 44);
+            color:aliceblue;
+            font-size: 32px;
+        }
+        body{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="init(this)">Start</button>
+    <canvas id="canvas" style="cursor:pointer"></canvas>
+    <script src="$.js"></script>
+    <script>
+        let context;
+        let teclasRandom = []
+        let teclasUser = []
+        const canvas=new Canvas()
+        canvas.fill()
+        const TECLAS=[]
+        const WIDTH_TECLA=50
+        const PADDING=100
+        let n=Get()
+        if(!n)window.location.search="level=2"
+        else n=parseInt(n.level)
+        class Tecla{
+            constructor(id,x,y,h,color,frequency){
+                this.id=id
+                this.x=x
+                this.y=y
+                this.h=h
+                this.color=color
+                this.w=WIDTH_TECLA
+                this.frequency=frequency
+            }
+            paint(){
+                canvas.rect(this.x,this.y,this.w,this.h,this.color,true,20)
+            }
+            click(coords){
+                
+                let px = coords.x; // En principio son iguales
+                if ( px < this.x ) px = this.x;
+                if ( px > this.x + this.w ) px = this.x + this.w;
+                let py = coords.y;
+                if ( py < this.y ) py = this.y;
+                if ( py > this.y + this.h ) py = this.y + this.h;
+                let distancia = Math.sqrt( (coords.x - px)*(coords.x - px) + (coords.y - py)*(coords.y - py) );
+                if ( distancia < 1) {
+                    teclasUser.push(this.id)
+                    Sonido(this.frequency)
+                }
+            }
+            sonar(){
+                Sonido(this.frequency)
+            }
+            
+        }
+        function createXilofono(){
+            let colores=["#FF5733","#7D3C98","#27AE60","#2980B9","#F39C12","#1ABC9C","#8E44AD","#E74C3C","#3498DB","#F1C40F"]
+            
+            for (let i = 0; i < 10; i++) {
+                TECLAS.push(new Tecla(i,((PADDING+canvas.width/10)+(i*WIDTH_TECLA)+(10*i)),(PADDING),100+(i*25),colores[i],getFrequencyFromNoteNumber(48+i)))
+            }
+            
+        }
+        function paintXilofono(){
+            canvas.rect(0,0,canvas.width,canvas.height,"white",true,0)
+            TECLAS.map(e=>e.paint())
+        }
+
+        //creamos contexto
+        
+        
+        function Sonido(frequency=261){//equivale a do cada semitono aumenta de 16 en 16
+            //creamos oscilador
+            
+            let osc = context.createOscillator();
+        
+            // admite: sine, square, sawtooth, triangle
+            osc.type = 'square'; 
+        
+            osc.frequency.value=frequency;
+        
+            //asignamos el destino para el sonido
+            osc.connect(context.destination);
+            //iniciamos la nota
+            osc.start();
+            //detenemos la nota medio segundo despues
+            osc.stop(context.currentTime + .5);
+        
+        }
+        function getFrequencyFromNoteNumber(noteNumber) {
+        var frequency = 440 * Math.pow(2, (noteNumber - 57) / 12);
+        return frequency;
+        }
+        $("canvas").event("click",(event)=>{
+            let FIN_GAME=false
+            let WIN=false
+            if(!FIN_GAME){
+                let coords=canvas.getMousePosition(event)
+                TECLAS.map(e=>e.click(coords))
+                teclasUser.map((e,i)=>{
+                    console.log(teclasRandom[i])
+                    if(teclasRandom[i]){
+                        if(e != teclasRandom[i]){
+                            alert("YOU LOSS")
+                            FIN_GAME=true
+                            window.location.reload()
+                        }
+                    }
+                })
+            }else{
+                window.location.search="level="+(n+2)
+            }
+
+            if(teclasRandom.length==teclasUser.length && !FIN_GAME ){
+                alert("win")
+                window.location.search="level="+(n+2)
+            }
+
+        })
+
+        function PaintTeclas(e){
+            canvas.rect(0,0,canvas.width,canvas.height,"black",true,0)
+            TECLAS[e].paint()
+            TECLAS[e].sonar()
+            
+        }
+        function timerLoad(f){
+            let cont=3
+            let t=setInterval(e=>{
+                canvas.rect(0,0,canvas.width,canvas.height,"black",true,0)
+                canvas.text(cont,canvas.width/2,canvas.height/2,100,"white")
+                cont--
+                if(cont<=0){
+                    f()
+                    clearInterval(t)
+                }
+            },1e3)
+        }
+        function game(){
+            
+            
+            for (let i = 0; i < n; i++) {
+                teclasRandom.push(Random(0,TECLAS.length))
+            }
+            let cont=0
+           timerLoad(e=>{
+            let ciclo= setInterval(e=>{
+                console.log(cont)
+                if(cont>=teclasRandom.length){
+                    paintXilofono()
+                    clearInterval(ciclo)
+                }else{
+                    PaintTeclas(teclasRandom[cont])
+                    cont++
+                }
+            },1e3)
+           })
+            
+        }
+        
+        function init(e){
+            e.setAttribute("style","display:none")
+            context=new (window.AudioContext || window.webkitAudioContext)()
+            canvas.rect(0,0,canvas.width,canvas.height,"black",true,0)
+            createXilofono()
+            game()
+            
+        }
+    </script>
+</body>
+</html>
